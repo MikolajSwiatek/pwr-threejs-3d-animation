@@ -1,0 +1,32 @@
+# Written by MakeHuman 1.0.2
+version v1.0.2
+tags css
+tongue tongue01 52ad91a3-caad-4e50-8c38-67634e5e789c
+proxy male1591 d7e4934e-daed-4ad5-a055-18c9cba487dc
+hair mhair02 f81a4e9a-e3d7-4ecb-bdf0-16d7fd9070a4
+eyelashes Eyelashes01 d533836f-13ad-4836-8b65-051108253cd2
+eyebrows Eyebrow001 9c81ec3a-faa5-4c94-9cdb-992300ba3084
+eyes HighPolyEyes 2c12f43b-1303-432c-b7ce-d78346baf2e6
+clothes jeans01 faa58a00-05db-4a53-a3a6-72af1cec2053
+clothes classic_shoes_lres 454af8ff-87e1-41b9-a84f-352f3b398082
+clothes tshirt02 1bba9db9-1859-424b-bbff-e3abd48f0fc5
+clothesHideFaces True
+gendered BreastFirmness 0.500000
+gendered BreastSize 0.500000
+macro Weight 0.403000
+macro Gender 1.000000
+macro Age 0.500000
+macro Height 0.602000
+macro Asian 0.000000
+macro African 0.000000
+macro Caucasian 1.000000
+macro Muscle 1.000000
+macro BodyProportions 1.000000
+background enabled False
+skinMaterial skins/young_caucasian_male/young_caucasian_male.mhmat
+material classic_shoes_lres 454af8ff-87e1-41b9-a84f-352f3b398082 clothes/shoes01/materials/black_classicshoes.mhmat
+material jeans01 faa58a00-05db-4a53-a3a6-72af1cec2053 clothes/jeans01/jeans01_black_leather.mhmat
+material mhair02 f81a4e9a-e3d7-4ecb-bdf0-16d7fd9070a4 hair/mhair02/materials/male02_black.mhmat
+material HighPolyEyes 2c12f43b-1303-432c-b7ce-d78346baf2e6 eyes/materials/brown.mhmat
+skeleton basic.json
+subdivide False
