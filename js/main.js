@@ -1,5 +1,33 @@
 var camera, scene, renderer, geometry, material, mesh, controls, trackball;
 
+var textures = [
+	"model/classicshoes_texture_normals.png",
+	"model/eyebrow001.png",
+	"model/eyelashes01.png",
+	"model/jeans01_black_diffuse.png",
+	"model/jeans01_normals.png",
+	"model/male02_diffuse_black.png",
+	"model/tongue01_diffuse.png",
+	"model/tshirt02_normals.png",
+	"model/tshirt02_texture.png",
+	"model/young_lightskinned_male_diffuse.png",
+	"model/brown_eye.png",
+	"model/classicshoes_texture_diffuse_black.png"
+];
+
+var LocationFiles = {
+	model: "model/",
+	textures: "img/textures"
+};
+
+	function getModel(name) {
+		return LocationFiles.model + name;
+	}
+
+	function getTexture(name) {
+		return LocationFiles.textures + name;
+	}
+	
 var Menu = function() {
   this.message = 'dat.gui';
 }
@@ -17,9 +45,14 @@ function init() {
     createScene();
 	createCamera();
 	createTrackball();
+	
+	var hemi = new THREE.HemisphereLight(0xffffff, 0xffffff);
+	scene.add(hemi);
+	
 	createCube();
 	addedCubeAndCameraToScene();
 	createRenderer();
+	createLight();
 	addedHuman();
 	addedRenderer();
 	createOrbitControls();
@@ -31,7 +64,8 @@ function init() {
 
 	function createCamera() {
 		camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-		camera.position.z = 500;
+		camera.position.set(50, 50, 400);
+		camera.lookAt(scene.position);
 	}
 
 	function createTrackball() {
@@ -60,58 +94,63 @@ function init() {
 
 	function createRenderer() {
 		renderer = new THREE.CanvasRenderer();
-		renderer.setSize(window.innerWidth, window.innerHeight);
+		renderer.setClearColor(0xdddddd);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMapSoft = true;
+	}
+	
+	function createLight() {
+        var light = new THREE.PointLight( 0xFFFFFF );
+        light.position.set( 0, 10, 200 );
+        scene.add( light );
 	}
 
 	function addedHuman() {
-		var loader = new THREE.JSONLoader();
-		loader.load( 'model/model.json', function (geometry, materials) {
-			createHuman(geometry, materials);
-		}); 
+		var texts;
+		loadTextures(function (result) {
+			texts = result;
+			
+			var loader = new THREE.JSONLoader();
+			loader.load(getModel('model.json'), function (geometry, materials) {
+				for(var i=0; i<materials.length; i++) {
+					THREE.ImageUtils.loadTexture(textures[i], THREE.UVMapping, function (image) {
+						materials[i] = new THREE.MeshBasicMaterial({ map: image })
+					} );
+				}
+
+				console.log(materials);
+				createHuman(geometry, materials);
+			});
+		});
 	}
 	
-		function createSkinnedMesh(geometry, materials) { 
-		  skinnedMesh = new THREE.SkinnedMesh(geometry, 
-			  new THREE.MeshFaceMaterial(materials)); 
-		  enableSkinning(skinnedMesh); 
-		}
-		
-		function enableSkinning(skinnedMesh) { 
-		   var materials = skinnedMesh.material.materials; 
-		   for (var i = 0,length = materials.length; i < length; i++) { 
-			   var mat = materials[i]; 
-			   mat.skinning = true; 
-		   } 
-		}
+		function loadTextures(callback) {
+			var loader = THREE.ImageUtils;
+			var results = new Array();
+/*
 	
-		function createHuman(geometry, materials) {
-			materials[0].shading = THREE.SmoothShading;
-			var material = loadMaterial(materials);
-			var human = getHumanMesh(geometry, material);
-			scene.add(human);
-		}
-		
-			function loadMaterial(materials) {
-				return new THREE.MeshFaceMaterial({ map: materials });
+			for (var i=0; i<textures.length; i++) {
+				loader.loadTexture(textures[i], THREE.UVMapping, function (image) {
+					results.push(new THREE.MeshBasicMaterial({ map: image }));
+				} );
 			}
 			
-				function loadTexture() {
-					var textureLoader = new THREE.TextureLoader();
-					var texture;
-					return textureLoader.load('model/young_lightskinned_male_diffuse.png', function(tex) {
-						return new THREE.MeshBasicMaterial({ map: tex });
-					});
-				}
-			
+*/			
+			callback(results);
+		}
+
+		function createHuman(geometry, materials) {
+			var human = getHumanMesh(geometry, materials);
+			scene.add(human);
+		}
+
 			function getHumanMesh(geometry, materials) {
-				var human = new THREE.Mesh(geometry, material);
+				var human = new THREE.Mesh(geometry, materials);
 				return setHumanPosition(human, 0, -50, 200);
 			}
 			
 				function setHumanPosition(human, x, y, z) {
-					human.position.x = x;
-					human.position.y = y;
-					human.position.z = z;
+					human.position.set(x, y, z)
 					return human;
 				}
 
