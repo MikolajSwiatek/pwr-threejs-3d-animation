@@ -16,11 +16,11 @@ function init() {
 }
 
 	function createScene() {
-			scene = new THREE.Scene();
+		scene = new THREE.Scene();
 	}
 
 	function createCamera() {
-		camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 10000);
+		camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
 		camera.position.z = 500;
 	}
 
@@ -55,19 +55,55 @@ function init() {
 
 	function addedHuman() {
 		var loader = new THREE.JSONLoader();
-		loader.load( 'model/model.json', function (geometry, materials) {
+		loader.load( 'model/model.js', function (geometry, materials) {
 			createHuman(geometry, materials);
 		}); 
 	}
 	
+		function createSkinnedMesh(geometry, materials) { 
+		  skinnedMesh = new THREE.SkinnedMesh(geometry, 
+			  new THREE.MeshFaceMaterial(materials)); 
+		  enableSkinning(skinnedMesh); 
+		}
+		
+		function enableSkinning(skinnedMesh) { 
+		   var materials = skinnedMesh.material.materials; 
+		   for (var i = 0,length = materials.length; i < length; i++) { 
+			   var mat = materials[i]; 
+			   mat.skinning = true; 
+		   } 
+		}
+	
 		function createHuman(geometry, materials) {
-			var material = new THREE.MeshNormalMaterial();
-			var human = new THREE.Mesh(geometry, materials);
-			human.position.x = 0;
-			human.position.y = 0;
-			human.position.z = 0;
+			materials[0].shading = THREE.SmoothShading;
+			var material = loadMaterial(materials);
+			var human = getHumanMesh(geometry, material);
 			scene.add(human);
 		}
+		
+			function loadMaterial(materials) {
+				return new THREE.MeshFaceMaterial({ map: materials });
+			}
+			
+				function loadTexture() {
+					var textureLoader = new THREE.TextureLoader();
+					var texture;
+					return textureLoader.load('model/young_lightskinned_male_diffuse.png', function(tex) {
+						return new THREE.MeshBasicMaterial({ map: tex });
+					});
+				}
+			
+			function getHumanMesh(geometry, materials) {
+				var human = new THREE.Mesh(geometry, material);
+				return setHumanPosition(human, 0, -50, 200);
+			}
+			
+				function setHumanPosition(human, x, y, z) {
+					human.position.x = x;
+					human.position.y = y;
+					human.position.z = z;
+					return human;
+				}
 
 	function addedRenderer() {
 		document.body.appendChild(renderer.domElement);
@@ -86,9 +122,12 @@ function animate() {
 }
 
 	function render() {
-		mesh.rotation.x += 0.01;
-		mesh.rotation.y += 0.02;
-		
+		//meshRotation(0.01, 0.02);
 		controls.update();   
 		renderer.render(scene, camera);
 	}
+	
+		function meshRotation(x, y) {
+			mesh.rotation.x += x;
+			mesh.rotation.y += y;
+		}
