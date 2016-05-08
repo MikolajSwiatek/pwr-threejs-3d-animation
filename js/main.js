@@ -1,5 +1,20 @@
 var camera, scene, renderer, geometry, material, mesh, controls, trackball;
 
+var Menu = function() {
+  this.message = 'dat.gui';
+  this.speed = 0.8;
+  this.displayOutline = false;
+}
+
+window.onload = function() {
+  var text = new Menu();
+  var gui = new DAT.GUI();
+  gui.add(text, 'message');
+  gui.add(text, 'speed', -5, 5);
+  gui.add(text, 'displayOutline');
+  gui.add(text, 'explode');
+};
+
 init();
 animate();
 
@@ -55,7 +70,7 @@ function init() {
 
 	function addedHuman() {
 		var loader = new THREE.JSONLoader();
-		loader.load( 'model/model.js', function (geometry, materials) {
+		loader.load( 'model/model.json', function (geometry, materials) {
 			createHuman(geometry, materials);
 		}); 
 	}
