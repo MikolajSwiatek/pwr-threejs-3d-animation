@@ -1,23 +1,20 @@
-var camera, scene, renderer, geometry, material, mesh, controls, trackball;
+var camera, scene, renderer, geometry, material, mesh, controls, trackball, statsApp, context;
 
 var textures = [
-	"model/classicshoes_texture_normals.png",
-	"model/eyebrow001.png",
-	"model/eyelashes01.png",
-	"model/jeans01_black_diffuse.png",
-	"model/jeans01_normals.png",
-	"model/male02_diffuse_black.png",
-	"model/tongue01_diffuse.png",
-	"model/tshirt02_normals.png",
-	"model/tshirt02_texture.png",
-	"model/young_lightskinned_male_diffuse.png",
-	"model/brown_eye.png",
-	"model/classicshoes_texture_diffuse_black.png"
+    "tongue01_diffuse.png",
+	"male02_diffuse_black.png",
+	"young_lightskinned_male_diffuse.png",
+	"jeans01_black_diffuse.png",
+	"classicshoes_texture_diffuse_black.png",
+	"eyelashes01.png",
+	"eyebrow001.png",
+	"brown_eye.png",
+	"tshirt02_normals.png",
 ];
 
 var LocationFiles = {
 	model: "model/",
-	textures: "img/textures"
+	textures: "img/textures/"
 };
 
 	function getModel(name) {
@@ -29,27 +26,27 @@ var LocationFiles = {
 	}
 	
 var Menu = function() {
-  this.message = 'dat.gui';
+  //this.message = 'dat.gui';
 }
 
 window.onload = function() {
   var text = new Menu();
   var gui = new DAT.GUI();
-  gui.add(text, 'message');
+  //gui.add(text, 'message');
 };
+
+window.addEventListener( 'resize', onWindowResize, false );  
 
 init();
 animate();
 
 function init() {
+	createStats();
     createScene();
 	createCamera();
 	createTrackball();
-	
-	var hemi = new THREE.HemisphereLight(0xffffff, 0xffffff);
-	scene.add(hemi);
-	
 	createCube();
+    //addFloor();
 	addedCubeAndCameraToScene();
 	createRenderer();
 	createLight();
@@ -58,13 +55,25 @@ function init() {
 	createOrbitControls();
 }
 
+	function createStats() {
+		var statsApp = new Stats();
+		statsApp.showPanel(1);
+		document.body.appendChild( statsApp.dom );
+		var canvas = document.createElement( 'canvas' );
+		canvas.width = 0;
+		canvas.height = 0;
+		document.body.appendChild( canvas );
+		context = canvas.getContext( '2d' );
+		context.fillStyle = 'rgba(127,0,255,0.05)';
+	}
+
 	function createScene() {
 		scene = new THREE.Scene();
 	}
 
 	function createCamera() {
 		camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-		camera.position.set(50, 50, 400);
+		camera.position.set(50, 50, 700);
 		camera.lookAt(scene.position);
 	}
 
@@ -82,10 +91,14 @@ function init() {
 	}
 
 	function createCube() {
-		geometry = new THREE.CubeGeometry(100, 100, 100);
+		geometry = createCubeGeometry(100, 200, 100);
 		material = new THREE.MeshNormalMaterial();
 		mesh = new THREE.Mesh(geometry, material);
 	}
+    
+        function createCubeGeometry(x, y, z) {
+            return new THREE.CubeGeometry(x, y, z);
+        }
 
 	function addedCubeAndCameraToScene() {
 		scene.add(camera);
@@ -100,53 +113,56 @@ function init() {
 	}
 	
 	function createLight() {
-        var light = new THREE.PointLight( 0xFFFFFF );
-        light.position.set( 0, 10, 200 );
-        scene.add( light );
+		var hemi = new THREE.HemisphereLight(0xffffff, 0xffffff);
+		scene.add(hemi);
 	}
+    
+    function addFloor() {
+        scene.add(createFloor());
+    }
+    
+        function createFloor() {
+            var plane = new THREE.PlaneGeometry(2000, 2000, 5, 5);
+            plane.applyMatrix(new THREE.Matrix4().makeRotationX(- Math.PI/2));
+            
+            var texture = THREE.ImageUtils.loadTexture('img/desert.jpg');
+            texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+            texture.repeat.set(64, 64);
+            
+            material = new THREE.MeshBasicMaterial({ color: 0xffffff, map: texture });
+            return new THREE.Mesh(plane, material);
+        }
 
 	function addedHuman() {
-		var texts;
-		loadTextures(function (result) {
-			texts = result;
-			
-			var loader = new THREE.JSONLoader();
-			loader.load(getModel('model.json'), function (geometry, materials) {
-				for(var i=0; i<materials.length; i++) {
-					THREE.ImageUtils.loadTexture(textures[i], THREE.UVMapping, function (image) {
-						materials[i] = new THREE.MeshBasicMaterial({ map: image })
-					} );
-				}
-
-				console.log(materials);
-				createHuman(geometry, materials);
-			});
+		var loader = new THREE.JSONLoader();
+		loader.load(getModel('model.json'), function (geometry, materials) {
+			for(var i=0; i<materials.length; i++) {                
+                materials[i] = getMaterial(i);
+			}
+			createHuman(geometry, materials);
 		});
 	}
+        function getMaterial(i) {
+            return new THREE.MeshBasicMaterial({ map: loadTexture(i) });
+        }
+            
+            function loadTexture(i) {
+                return THREE.ImageUtils.loadTexture(getTexturPath(i));
+            }
+            
+                function getTexturPath(i) {
+                    return getTexture(textures[i]);
+                }
 	
-		function loadTextures(callback) {
-			var loader = THREE.ImageUtils;
-			var results = new Array();
-/*
-	
-			for (var i=0; i<textures.length; i++) {
-				loader.loadTexture(textures[i], THREE.UVMapping, function (image) {
-					results.push(new THREE.MeshBasicMaterial({ map: image }));
-				} );
-			}
-			
-*/			
-			callback(results);
-		}
-
 		function createHuman(geometry, materials) {
 			var human = getHumanMesh(geometry, materials);
 			scene.add(human);
 		}
 
 			function getHumanMesh(geometry, materials) {
-				var human = new THREE.Mesh(geometry, materials);
-				return setHumanPosition(human, 0, -50, 200);
+				var human = new THREE.Mesh(geometry, 
+                    new THREE.MeshFaceMaterial(materials));
+				return setHumanPosition(human, 0, 250, 200);
 			}
 			
 				function setHumanPosition(human, x, y, z) {
@@ -168,6 +184,7 @@ function init() {
 function animate() {
     requestAnimationFrame(animate);
     render();
+	statRun();
 }
 
 	function render() {
@@ -180,3 +197,26 @@ function animate() {
 			mesh.rotation.x += x;
 			mesh.rotation.y += y;
 		}
+		
+	function statRun() {
+		if (statsApp != undefined) {
+			var time = performance.now() / 1000;
+			context.clearRect( 0, 0, 512, 512 );
+			statsApp.begin();
+			for ( var i = 0; i < 2000; i ++ ) {
+				var x = Math.cos( time + i * 0.01 ) * 196 + 256;
+				var y = Math.sin( time + i * 0.01234 ) * 196 + 256;
+				context.beginPath();
+				context.arc( x, y, 10, 0, Math.PI * 2, true );
+				context.fill();
+			}
+			statsApp.end();
+			requestAnimationFrame(animate);
+		}
+	}
+	
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+}  
