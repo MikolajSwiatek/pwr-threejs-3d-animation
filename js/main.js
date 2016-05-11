@@ -1,4 +1,5 @@
-var camera, scene, renderer, geometry, material, mesh, controls, trackball, statsApp, context;
+var camera, scene, renderer, geometry, material, mesh, controls, trackball, statsApp, context, clock, mixer;
+var animations = [];
 
 var textures = [
     "tongue01_diffuse.png",
@@ -41,6 +42,7 @@ init();
 animate();
 
 function init() {
+    createClock();
 	createStats();
     createScene();
 	createCamera();
@@ -54,6 +56,10 @@ function init() {
 	addedRenderer();
 	createOrbitControls();
 }
+
+    function createClock() {
+        clock = new THREE.Clock();
+    }
 
 	function createStats() {
 		var statsApp = new Stats();
@@ -91,7 +97,7 @@ function init() {
 	}
 
 	function createCube() {
-		geometry = createCubeGeometry(100, 200, 100);
+		geometry = createCubeGeometry(100, 100, 100);
 		material = new THREE.MeshNormalMaterial();
 		mesh = new THREE.Mesh(geometry, material);
 	}
@@ -135,13 +141,19 @@ function init() {
 
 	function addedHuman() {
 		var loader = new THREE.JSONLoader();
-		loader.load(getModel('model.json'), function (geometry, materials) {
+		loader.load(getModel('model1.json'), function (geometry, materials) {
+            saveAnimations(geometry);
 			for(var i=0; i<materials.length; i++) {                
                 materials[i] = getMaterial(i);
+                materials[i].skinning = true;
 			}
 			createHuman(geometry, materials);
 		});
 	}
+        function saveAnimations(geometry) {
+            animations = geometry.animations;
+        }
+        
         function getMaterial(i) {
             return new THREE.MeshBasicMaterial({ map: loadTexture(i) });
         }
@@ -157,18 +169,25 @@ function init() {
 		function createHuman(geometry, materials) {
 			var human = getHumanMesh(geometry, materials);
 			scene.add(human);
+            
+            createAnimation(human, 0);
 		}
 
 			function getHumanMesh(geometry, materials) {
 				var human = new THREE.Mesh(geometry, 
                     new THREE.MeshFaceMaterial(materials));
-				return setHumanPosition(human, 0, 250, 200);
+				return setHumanPosition(human, -150, 0, 400);
 			}
 			
 				function setHumanPosition(human, x, y, z) {
 					human.position.set(x, y, z)
 					return human;
 				}
+         
+         function createAnimation(human, number) {
+             mixer = new THREE.AnimationMixer(human);
+					mixer.clipAction(animations[ 0 ]).play();
+         }
 
 	function addedRenderer() {
 		document.body.appendChild(renderer.domElement);
@@ -183,13 +202,14 @@ function init() {
 
 function animate() {
     requestAnimationFrame(animate);
+    //THREE.AnimationHandler.update( clock.getDelta() );
+    controls.update();  
+    update();
     render();
-	statRun();
 }
 
 	function render() {
 		//meshRotation(0.01, 0.02);
-		controls.update();   
 		renderer.render(scene, camera);
 	}
 	
@@ -198,22 +218,10 @@ function animate() {
 			mesh.rotation.y += y;
 		}
 		
-	function statRun() {
-		if (statsApp != undefined) {
-			var time = performance.now() / 1000;
-			context.clearRect( 0, 0, 512, 512 );
-			statsApp.begin();
-			for ( var i = 0; i < 2000; i ++ ) {
-				var x = Math.cos( time + i * 0.01 ) * 196 + 256;
-				var y = Math.sin( time + i * 0.01234 ) * 196 + 256;
-				context.beginPath();
-				context.arc( x, y, 10, 0, Math.PI * 2, true );
-				context.fill();
-			}
-			statsApp.end();
-			requestAnimationFrame(animate);
-		}
-	}
+	function update() {
+        var delta = clock.getDelta();
+        //THREE.AnimationHandler.update(delta);
+    }
 	
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
