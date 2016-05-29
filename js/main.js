@@ -92,11 +92,12 @@ var app = {
 		this.mixer = new THREE.AnimationMixer(this.character.mesh);
 		//for (var i=0; i<this.character.animations.length; i++) {
 		for (var i=0; i<3; i++) {
-			this.mixer.clipAction(this.character.animations[i], 0).play();
+			this.mixer.clipAction(this.character.animations[i]).play();
+			this.mixer._actions[i].weight = 0;
 		}
 		
 		if (this.mixer._actions[0] != undefined) {
-			this.mixer._actions[0].weight = 0;
+			this.mixer._actions[0].weight = 1;
 		}
 	},
 	
@@ -107,13 +108,16 @@ var app = {
 	},
 	
 	animate: function() {
-		//THREE.AnimationHandler.update(clock.getDelta());
-		this.controls.update();  
 		this.delta = this.clock.getDelta();
+		if(this.mixer) 
+			this.mixer.update(this.delta);
+			
+		this.controls.update();  
 		this.render();
 	},
 	
 	render: function() {
+		this.cube.move(0.01, 0.02);
 		this.renderer.render(this.scene, this.camera);
 	},
 	
@@ -169,6 +173,11 @@ function Cube() {
 		scene.add(this.camera);
 		scene.add(this.mesh);
 	};
+	
+	this.move = function(x, y) {
+		this.mesh.rotation.x += x;
+		this.mesh.rotation.y += y;
+	};
 };
 
 function Character() {
@@ -199,6 +208,7 @@ function Character() {
 			else {
 				mat.side = THREE.DoubleSide;
 				mat.shading = THREE.FlatShading;
+				mat.skinning = true;
 				this.materials = mat;
 				this.mesh = new THREE.SkinnedMesh(geometry,mat);
 			}
@@ -249,13 +259,12 @@ window.onload = function() {
   app.createCube(100, 100, 100);
   //app.init("model1.json");
   app.init("trying_mirror.json");
-  app.saveMeshs();
   animate();
 };
 
 window.addEventListener( 'resize', app.onWindowResize, false );  
 
 function animate() {
-	requestAnimationFrame(animate);
 	app.animate();
+	requestAnimationFrame(animate);
 }
