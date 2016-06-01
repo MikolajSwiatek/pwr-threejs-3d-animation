@@ -137,7 +137,7 @@ var app = {
     
     addCube: function() {
         app.cube = new Cube()
-		app.cube.create(100,100, 100, new THREE.MeshNormalMaterial());	
+		app.cube.create(100,100, 100);	
     },
 	
 	loadCharacter: function()
@@ -165,6 +165,8 @@ var app = {
 			app.mixer._actions[1].weight = 1;			
 			app.mixer._actions[2].weight = 0;		
 		});
+        
+       app.cube.add(app.scene);
 	},
 
 	render: function ()
@@ -198,16 +200,15 @@ function Cube() {
 	this.material = null,
 	this.mesh = null,
 	
-	this.create = function(x, y, z, m) {
-		this.geometry = new THREE.CubeGeometry(x, y, z);
-		this.material = m;
+	this.create = function(x, y, z) {
+		this.geometry = new THREE.BoxGeometry(200, 200, 200, 50, 50, 50);
+		this.material = new THREE.MeshNormalMaterial({color: 0xfffff, wireframe: true});
 		this.mesh = new THREE.Mesh(
 			this.geometry, 
 			this.material);
 	};
 	
 	this.add = function(scene) {
-		scene.add(this.camera);
 		scene.add(this.mesh);
 	};
 	
