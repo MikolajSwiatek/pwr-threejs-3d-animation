@@ -44,6 +44,7 @@ var app = {
         app.camera.position.z = 70;
         app.camera.position.y = 0; 
         app.camera.lookAt(app.scene.position);
+		app.scene.add(app.camera);
     },
     
     setRenderer: function() {
@@ -149,7 +150,7 @@ var app = {
 			mat.side = THREE.DoubleSide;
 			mat.shading = THREE.FlatShading;
             
-			app.character = new THREE.SkinnedMesh(geometry,mat);
+			app.character = new THREE.SkinnedMesh(geometry, mat);
 			
 			app.scene.add(app.character);
 				
@@ -163,7 +164,16 @@ var app = {
 			app.mixer.clipAction(app.character.geometry.animations[2], 0).play();
 			app.mixer._actions[0].weight = 0;
 			app.mixer._actions[1].weight = 1;			
-			app.mixer._actions[2].weight = 0;		
+			app.mixer._actions[2].weight = 0;	
+			
+			var ambientLight = new THREE.AmbientLight(0xffffff);
+			app.scene.add(ambientLight);        
+	
+			var pointLight = new THREE.PointLight(0x888888);
+			pointLight.position.x = 100;
+			pointLight.position.y = 100;
+			pointLight.position.z = 100;
+			app.scene.add(pointLight);    	
 		});
         
        app.cube.add(app.scene);
@@ -209,7 +219,7 @@ function Cube() {
 	};
 	
 	this.add = function(scene) {
-		scene.add(this.mesh);
+		//scene.add(this.mesh);
 	};
 	
 	this.move = function(x, y) {
