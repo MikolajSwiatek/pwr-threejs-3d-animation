@@ -219,7 +219,7 @@ function Cube() {
 	};
 	
 	this.add = function(scene) {
-		//scene.add(this.mesh);
+		scene.add(this.mesh);
 	};
 	
 	this.move = function(x, y) {
