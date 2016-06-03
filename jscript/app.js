@@ -148,7 +148,7 @@ var app = {
 			var mat = materials[0];
 			mat.skinning = true;
 			mat.side = THREE.DoubleSide;
-			mat.shading = THREE.FlatShading;
+			//mat.shading = THREE.FlatShading;
             
 			app.character = new THREE.SkinnedMesh(geometry, mat);
 			
@@ -166,14 +166,12 @@ var app = {
 			app.mixer._actions[1].weight = 1;			
 			app.mixer._actions[2].weight = 0;	
 			
-			var ambientLight = new THREE.AmbientLight(0xffffff);
+			var ambientLight = new THREE.AmbientLight(0x050505);
 			app.scene.add(ambientLight);        
 	
-			var pointLight = new THREE.PointLight(0x888888);
-			pointLight.position.x = 100;
-			pointLight.position.y = 100;
-			pointLight.position.z = 100;
-			app.scene.add(pointLight);    	
+			var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+			directionalLight.position.set(500, 500, 500);
+			app.scene.add(directionalLight);    	
 		});
         
        app.cube.add(app.scene);
